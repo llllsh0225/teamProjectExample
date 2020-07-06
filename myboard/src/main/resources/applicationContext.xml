@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.3.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+	<context:component-scan base-package="tommy.spring.web">
+	</context:component-scan>
+	<aop:aspectj-autoproxy></aop:aspectj-autoproxy>
+	
+	<context:property-placeholder location="classpath:config/database.properties"/> <!-- classpath: = src/main/resources/ -->
+	<bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="${jdbc.driver}"></property>
+		<property name="url" value="${jdbc.url}"></property>
+		<property name="username" value="${jdbc.username}"></property>
+		<property name="password" value="${jdbc.password}"></property>
+	</bean>
+	
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="get*" read-only="true"/>
+			<tx:method name="*"/>
+		</tx:attributes>
+	</tx:advice>
+	
+	<aop:config>
+		<aop:pointcut expression="execution(* tommy.spring.web..*(..))" id="txPointcut"/>
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="txPointcut"/>
+	</aop:config>
+	<!-- 
+	<bean id="log" class="tommy.spring.web.common.Log4jAdvice"></bean>
+	<bean id="before" class="tommy.spring.web.common.BeforeAdvice"></bean>
+	<bean id="afterReturning" class="tommy.spring.web.common.AfterReturningAdvice"></bean>
+	<bean id="afterThrowing" class="tommy.spring.web.common.AfterThrowingAdvice"></bean>
+	<bean id="after" class="tommy.spring.web.common.AfterAdvice"></bean>
+	<bean id="around" class="tommy.spring.web.common.AroundAdvice"></bean>
+	<aop:config>
+		<aop:pointcut expression="execution(* tommy.spring.web..*Impl.*(..))" id="allPointcut"/>
+		<aop:pointcut expression="execution(* tommy.spring.web..*Impl.get*(..))" id="getPointcut"/>
+		<aop:aspect ref="around">
+			<aop:around method="aroundLog" pointcut-ref="getPointcut" />
+		</aop:aspect>
+	</aop:config>
+	 -->
+	<!-- 
+	<bean id="userService" class="tommy.spring.web.user.impl.UserServiceImpl">
+		<property name="userDAO" ref="userDAO"/>
+	</bean>
+	<bean id="userDAO" class="tommy.spring.web.user.impl.UserDAO"></bean>
+	 -->
+	<!-- 	
+	<bean id="myLifeBean" class="tommy.spring.lifecycle.MyLifeBeanImpl" init-method="init">
+		<property name="greeting"><value>Hello, </value></property>
+	</bean>
+	<bean class="tommy.spring.lifecycle.CustomBeanPostProcessor"/>
+	 -->
+	<!--  component-scan base-package="tommy.spring.polymorphism">
+	</context:component-scan>
+	<bean id="speaker" class="tommy.spring.polymorphism.AppleSpeaker"/> 
+	-->
+	<!--  
+	<bean id="collectionBean" class="tommy.spring.collection.CollectionBean">
+		<property name="addressList">
+			<set value-type="java.lang.String">
+				<value>서울시 서초구 서초동</value>
+				<value>서울시 동대문구 장안동</value>
+				<value>서울시 동대문구 장안동</value>
+				<value>서울시 동대문구 장안동</value>
+				<value>서울시 동대문구 장안동</value>
+			</set>
+	-->
+			<!-- 
+			<props>
+				<prop key="홍길동">율도국</prop>
+				<prop key="손오공">화과산</prop>
+			</props>
+			 -->
+			<!-- 
+			<map>
+				<entry>
+					<key><value>홍길동</value></key>
+					<value>율도국</value>
+				</entry>
+				<entry>
+					<key><value>손오공</value></key>
+					<value>화과산</value>
+				</entry>
+			</map>
+			 -->
+			<!-- 
+			<list>
+				<value>서울시 서초구 서초동</value>
+				<value>서울시 동대문구 장안동</value>
+				<value>서울시 동대문구 장안동</value>
+				<value>서울시 동대문구 장안동</value>
+				<value>서울시 동대문구 장안동</value>
+				<value>서울시 동대문구 장안동</value>
+			</list>
+			
+		</property>
+	</bean>
+	-->
+	<!--  
+	<bean id="carFactory" class="test.aaa.CarFactory">
+		<lookup-method name="makeRedCar" bean="redCarType"/>
+		<lookup-method name="makeBlueCar" bean="blueCarType"/>
+	</bean>
+	
+	<bean id="redCarType" class="test.aaa.Car" scope="prototype">
+		<property name="color" value="Red"/>
+	</bean>
+	<bean id="blueCarType" class="test.aaa.Car" scope="prototype">
+		<property name="color" value="blue"></property>
+	</bean>
+	<bean id="tv" class="tommy.spring.polymorphism.SamsungTV" p:speaker-ref="sony" p:price="2800000">
+		  Setter Method Injection
+		<property name="speaker" ref="apple"/>
+		<property name="price" value="3000000"/>
+		
+		  Construction Injection
+		<constructor-arg index="0" ref="apple"></constructor-arg>
+		<constructor-arg index="1" value="1800000"></constructor-arg>
+		
+	</bean>
+	
+	<bean id="sony" class="tommy.spring.polymorphism.SonySpeaker"/>
+	<bean id="apple" class="tommy.spring.polymorphism.AppleSpeaker" />
+	-->
+</beans>
